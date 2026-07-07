@@ -58,7 +58,7 @@ Screenshot of uploading the image:
 
 After uploading the image, I wrote this prompt:
 
-> Add a realistic moose to this picture. Keep the original mountains, sea, field, man, dog, cows, lighting, and camera style unchanged. Place the moose naturally in the grass so it looks like it belongs in the scene.
+> add a moose to the picture 
 
 Screenshot of the prompt:
 
