@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPA Calculator - Hareem Khan</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #eef3f8;
+      color: #1f2937;
+    }
+    .container {
+      width: min(1200px, 94%);
+      margin: 28px auto;
+      background: white;
+      padding: 26px;
+      border-radius: 18px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.10);
+    }
+    h1 { margin-top: 0; color: #123c69; }
+    h2 { margin-bottom: 8px; color: #123c69; }
+    .program {
+      background: #e8f0fe;
+      border-left: 6px solid #2563eb;
+      padding: 15px 18px;
+      border-radius: 10px;
+      font-size: 18px;
+      margin: 16px 0;
+    }
+    .description {
+      background: #fff8dc;
+      border-left: 6px solid #f59e0b;
+      padding: 13px 16px;
+      border-radius: 10px;
+      line-height: 1.5;
+      margin: 16px 0;
+    }
+    .top-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    .info-wrapper { position: relative; display: inline-block; }
+    .info-button {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: #2563eb;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 17px;
+    }
+    .tooltip {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: 38px;
+      width: min(760px, 88vw);
+      max-height: 430px;
+      overflow-y: auto;
+      background: white;
+      color: #111827;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.22);
+      z-index: 10;
+      line-height: 1.55;
+    }
+    .info-wrapper:hover .tooltip,
+    .info-wrapper:focus-within .tooltip,
+    .tooltip.open { display: block; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 18px;
+      font-size: 14px;
+    }
+    th {
+      background: #123c69;
+      color: white;
+      padding: 11px;
+      text-align: left;
+      position: sticky;
+      top: 0;
+    }
+    td {
+      padding: 10px 11px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+    tr:nth-child(even) { background: #f8fafc; }
+    .yes { color: #047857; font-weight: bold; }
+    .no { color: #b91c1c; font-weight: bold; }
+    .additional { color: #2563eb; font-size: 12px; font-weight: bold; }
+    .inprogress { color: #92400e; font-size: 12px; font-weight: bold; }
+    .actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+    button.calculate {
+      border: none;
+      border-radius: 10px;
+      padding: 12px 18px;
+      background: #2563eb;
+      color: white;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    button.calculate:hover { background: #1d4ed8; }
+    button.secondary { background: #059669; }
+    button.secondary:hover { background: #047857; }
+    input[type="number"] {
+      width: 88px;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    .result {
+      display: none;
+      margin-top: 20px;
+      background: #ecfdf5;
+      border-left: 6px solid #10b981;
+      border-radius: 10px;
+      padding: 16px;
+      line-height: 1.6;
+      font-size: 17px;
+    }
+    .note {
+      font-size: 14px;
+      color: #4b5563;
+      line-height: 1.5;
+      margin-top: 12px;
+    }
+    .small { font-size: 13px; color: #6b7280; }
+    .footer {
+      margin-top: 22px;
+      font-size: 13px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>Student GPA Calculator</h1>
+
+    <div class="program">
+      <strong>Academic Program:</strong> Computer Engineering (International)
+    </div>
+
+    <div class="description">
+      This application helps a student calculate GPA based on the transcript. The table is loaded automatically when the page opens.
+      It contains the course name, credit, grade, and whether the course is passed. The last five rows are additional future courses
+      from the program and are assumed to have grade A / 100, credit 6, and passed status Yes.
+    </div>
+
+    <div class="top-row">
+      <h2>Course List</h2>
+      <div class="info-wrapper">
+        <button class="info-button" onclick="toggleTooltip()" aria-label="Information about GPA">i</button>
+        <div class="tooltip" id="gpaTooltip">
+          <h3>Information about GPA</h3>
+          <p>
+            Grade Point Average (GPA) is a weighted academic performance indicator. Each course has credits, and each final score is converted into a grade point.
+            The GPA is calculated by multiplying the course credits by the grade points, adding these values together, and dividing by the total number of credits included in the calculation.
+          </p>
+          <p><strong>Formula:</strong> GPA = Σ(credit × grade point) / Σ(credit)</p>
+          <p><strong>Grade point conversion used in this application:</strong></p>
+          <ul>
+            <li>A, 91–100 points = 4.0</li>
+            <li>B, 81–90 points = 3.2</li>
+            <li>C, 71–80 points = 2.4</li>
+            <li>D, 61–70 points = 1.6</li>
+            <li>E, 51–60 points = 0.8</li>
+            <li>FX, 41–50 points = 0</li>
+            <li>F, 0–40 points = 0</li>
+          </ul>
+          <p>
+            A course is considered passed if the final score is at least 51. Failed courses receive 0 grade points. Courses that are still in progress are shown in the table,
+            but they are not included in the normal GPA calculation until a final score is assumed or available.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>course</th>
+          <th>credit</th>
+          <th>grade</th>
+          <th>passed</th>
+        </tr>
+      </thead>
+      <tbody id="courseTable"></tbody>
+    </table>
+
+    <div class="actions">
+      <button class="calculate" onclick="calculateGPA(false)">Calculate</button>
+      <button class="calculate secondary" onclick="calculateGPA(true)">Calculate with Introduction to AI</button>
+      <label>
+        Current accumulated points in Introduction to AI:
+        <input id="aiCurrentPoints" type="number" min="0" max="70" value="65">
+      </label>
+    </div>
+
+    <p class="note">
+      The second button assumes that the final score for <strong>Introduction to Artificial Intelligence</strong> equals the current accumulated points plus 30 final exam points.
+      For example, with 65 current points, the assumed final score is 65 + 30 = 95.
+    </p>
+
+    <div id="result" class="result"></div>
+
+    <p class="footer">
+      This web application is made as exactly one HTML file. CSS and JavaScript are embedded inside this file. No external libraries, frameworks, CDNs, or additional files are used.
+    </p>
+  </main>
+
+  <script>
+    const courses = [
+      { course: "Basics of Physics I (including Lab) (ENG)", credit: 8, grade: 85, passed: "Yes" },
+      { course: "Calculus I (ENG)", credit: 6, grade: 84, passed: "Yes" },
+      { course: "Computer Organization (ENG)", credit: 6, grade: 70, passed: "Yes" },
+      { course: "Introduction to Information Technologies (ENG)", credit: 5, grade: 100, passed: "Yes" },
+      { course: "Introduction to Programming (ENG)", credit: 6, grade: 86, passed: "Yes" },
+
+      { course: "Academic Techniques (ENG)", credit: 6, grade: 88, passed: "Yes" },
+      { course: "Calculus II (ENG)", credit: 6, grade: 69, passed: "Yes" },
+      { course: "Introduction to Modern Thought I (ENG)", credit: 6, grade: 66, passed: "Yes" },
+      { course: "Mathematical Foundation of Computing (ENG)", credit: 6, grade: 89, passed: "Yes" },
+      { course: "Practical Course of Georgian for Foreigners (A1.1a) (ENG)", credit: 6, grade: 89, passed: "Yes" },
+
+      { course: "Basics of Physics II (ENG)", credit: 6, grade: 86, passed: "Yes" },
+      { course: "Calculus III (ENG)", credit: 6, grade: 76, passed: "Yes" },
+      { course: "Practical Course of Georgian for Foreigners (A1.1b) (ENG)", credit: 6, grade: 88, passed: "Yes" },
+      { course: "Programming in Python (ENG)", credit: 6, grade: 57, passed: "Yes" },
+      { course: "System Programming (ENG)", credit: 6, grade: 90, passed: "Yes" },
+
+      { course: "Basics of Entrepreneurship (ENG)", credit: 6, grade: 92, passed: "Yes" },
+      { course: "Circuit Analysis I (ENG)", credit: 6, grade: 81, passed: "Yes" },
+      { course: "IT Project Management (ENG)", credit: 6, grade: 91, passed: "Yes" },
+      { course: "Introduction to Linear Algebra (ENG)", credit: 6, grade: 91, passed: "Yes" },
+      { course: "Procedural Programming with C (ENG)", credit: 6, grade: 81, passed: "Yes" },
+
+      { course: "Algorithms and Data Structures (ENG)", credit: 6, grade: 76, passed: "Yes" },
+      { course: "Circuit Analysis II (ENG)", credit: 6, grade: 73, passed: "Yes" },
+      { course: "Computational and Statistical Methods (ENG)", credit: 6, grade: 81, passed: "Yes" },
+      { course: "Computer and Data Networks (ENG)", credit: 6, grade: 91, passed: "Yes" },
+      { course: "Hardware Design and Prototyping (ENG)", credit: 6, grade: 57, passed: "Yes" },
+
+      { course: "Digital Circuits (ENG)", credit: 6, grade: 92, passed: "Yes" },
+      { course: "Embedded Systems (ENG)", credit: 6, grade: 100, passed: "Yes" },
+      { course: "Introduction to Cyber Security (ENG)", credit: 6, grade: 82, passed: "Yes" },
+      { course: "Introduction to Operating Systems (ENG)", credit: 6, grade: 95, passed: "Yes" },
+      { course: "Signals and Systems (ENG)", credit: 6, grade: 86, passed: "Yes" },
+
+      { course: "Architecture and Programming of Microprocessors (ENG)", credit: 6, grade: 97, passed: "Yes" },
+      { course: "Databases and Information Systems (ENG)", credit: 6, grade: 98, passed: "Yes" },
+      { course: "DevOps Technologies (ENG)", credit: 6, grade: 0, passed: "No", inProgress: true },
+      { course: "Introduction to Artificial Intelligence (ENG)", credit: 6, grade: 65, passed: "No", inProgress: true, aiCourse: true },
+      { course: "Principles of Numerical Methods (ENG)", credit: 6, grade: 91, passed: "Yes" },
+
+      { course: "Senior Design Project A (ENG)", credit: 6, grade: 100, passed: "Yes", additional: true },
+      { course: "Senior Design Project B (ENG)", credit: 6, grade: 100, passed: "Yes", additional: true },
+      { course: "AWS Cloud Practitioner (ENG)", credit: 6, grade: 100, passed: "Yes", additional: true },
+      { course: "Software Architecture and Engineering (ENG)", credit: 6, grade: 100, passed: "Yes", additional: true },
+      { course: "Introduction to Machine Learning (ENG)", credit: 6, grade: 100, passed: "Yes", additional: true }
+    ];
+
+    function gradePoint(score) {
+      const s = Number(score);
+      if (s >= 91) return 4.0;
+      if (s >= 81) return 3.2;
+      if (s >= 71) return 2.4;
+      if (s >= 61) return 1.6;
+      if (s >= 51) return 0.8;
+      return 0;
+    }
+
+    function displayCourses() {
+      const tbody = document.getElementById("courseTable");
+      tbody.innerHTML = "";
+
+      courses.forEach(item => {
+        const row = document.createElement("tr");
+        let label = "";
+        if (item.additional) label = " <span class='additional'>(additional)</span>";
+        if (item.inProgress) label = " <span class='inprogress'>(currently in progress)</span>";
+
+        row.innerHTML = `
+          <td>${item.course}${label}</td>
+          <td>${item.credit}</td>
+          <td>${item.grade}</td>
+          <td class="${item.passed === "Yes" ? "yes" : "no"}">${item.passed}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function calculateFromList(list) {
+      let totalCredits = 0;
+      let totalWeighted = 0;
+
+      list.forEach(item => {
+        if (item.inProgress) return;
+        const credit = Number(item.credit);
+        const point = gradePoint(item.grade);
+        totalCredits += credit;
+        totalWeighted += credit * point;
+      });
+
+      if (totalCredits === 0) return { gpa: 0, totalCredits: 0, totalWeighted: 0 };
+      return { gpa: totalWeighted / totalCredits, totalCredits: totalCredits, totalWeighted: totalWeighted };
+    }
+
+    function calculateGPA(withAI) {
+      let list = courses.map(item => ({ ...item }));
+      let aiText = "";
+
+      if (withAI) {
+        const currentPoints = Number(document.getElementById("aiCurrentPoints").value);
+        const assumedFinal = Math.min(100, currentPoints + 30);
+
+        list = list.map(item => {
+          if (item.aiCourse) {
+            return { ...item, grade: assumedFinal, passed: assumedFinal >= 51 ? "Yes" : "No", inProgress: false };
+          }
+          return item;
+        });
+
+        aiText = `Introduction to Artificial Intelligence assumed final score: ${currentPoints} + 30 = ${assumedFinal}<br>`;
+      }
+
+      const result = calculateFromList(list);
+      const resultBox = document.getElementById("result");
+      resultBox.style.display = "block";
+
+      resultBox.innerHTML = `
+        <strong>${withAI ? "GPA with Introduction to AI" : "Calculated GPA"}:</strong> ${result.gpa.toFixed(2)}<br>
+        ${aiText}
+        Total counted credits: ${result.totalCredits}<br>
+        Total weighted grade points: ${result.totalWeighted.toFixed(2)}
+      `;
+    }
+
+    function toggleTooltip() {
+      document.getElementById("gpaTooltip").classList.toggle("open");
+    }
+
+    displayCourses();
+  </script>
+</body>
+</html>
